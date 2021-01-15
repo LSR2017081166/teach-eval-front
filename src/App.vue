@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <h1>毕设前端</h1>
     <!-- 路由出口 -->
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
