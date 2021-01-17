@@ -5,14 +5,14 @@
     <div class="formArea">
       <van-form @submit="onLogin">
         <van-field
-          v-model="username"
-          name="用户名"
-          label="用户名"
-          placeholder="用户名"
+          v-model="user.account"
+          name="账号"
+          label="账号"
+          placeholder="账号"
           :rules="[{ required: true, message: '请填写用户名' }]"
         />
         <van-field
-          v-model="password"
+          v-model="user.password"
           type="password"
           name="密码"
           label="密码"
@@ -31,40 +31,43 @@
 
 <script>
 import { Toast } from "vant";
-// import {login} from '@/api/user'
+import { login } from "@/api/user";
 export default {
   name: "LoginIndex",
   props: {},
   data() {
     return {
-      username: "",
-      password: "",
+      user: {
+        account: "",
+        password: "",
+      },
     };
   },
   components: {},
   computed: {},
   methods: {
-    async login1(){
-      const {data}=await login()
-      console.log(data);
-    },
-    onLogin() {
+    async onLogin() {
       Toast.loading({
         message: "登录中...",
         forbidClick: true,
         duration: 0,
       });
-      if (this.username.length === 10 && this.password === "123") {
-        this.$router.push("/student");
-        Toast.success("登录成功！");
-      } else if (this.username.length === 8 && this.password === "123") {
-        this.$router.push("/teacher");
-        Toast.success("登录成功！");
-      } else if (this.username.length === 6 && this.password === "123") {
-        this.$router.push("/administrator");
-        Toast.success("登录成功！");
+      const res = await login(this.user);
+      let data = res.data.data;
+      // 判断账号类型,以此进入不同页面
+      if (res.data.status === 1) {
+        if (data.account.length === 10) {
+          this.$router.push("/student");
+          Toast.success("登录成功！");
+        } else if (data.account.length === 8) {
+          this.$router.push("/teacher");
+          Toast.success("登录成功！");
+        } else if (data.account.length === 6) {
+          this.$router.push("/administrator");
+          Toast.success("登录成功！");
+        }
       } else {
-        Toast.success("登录失败，账号或密码错误！");
+        Toast.fail("登录失败，账号或密码错误！");
       }
     },
   },

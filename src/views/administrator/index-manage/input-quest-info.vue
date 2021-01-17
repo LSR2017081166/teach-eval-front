@@ -7,49 +7,23 @@
       left-arrow
       @click-left="onClickLeft"
     >
-      <template #right>
-        <van-icon name="other-pay" size="23" />
-      </template>
     </van-nav-bar>
     <!-- 问卷信息填写 -->
     <div class="addQuestInfo">
       <!-- 请输入问卷名称 -->
-      <van-field v-model="value" label="问卷名称" />
-      <!-- 请输入问卷开始时间 -->
-      <van-field
-        readonly
-        clickable
-        name="picker"
-        :value="value"
-        label="问卷开始时间"
-        placeholder="点击选择开始时间"
-        @click="showPicker = true"
+      <van-field v-model="quest.name" label="问卷名称" />
+      <!-- 选择问卷填写时间区间 -->
+      <van-cell
+        title="选择该问卷评教时间区间"
+        :value="quest.section"
+        @click="show = true"
       />
-      <van-popup v-model="showPicker" position="bottom">
-        <van-picker
-          show-toolbar
-          :columns="columns"
-          @confirm="onConfirm"
-          @cancel="showPicker = false"
-        />
-      </van-popup>
-      <!-- 请输入填写问卷期限 -->
-      <van-field
-        readonly
-        clickable
-        name="datetimePicker"
-        :value="value"
-        label="问卷期限"
-        placeholder="点击选择问卷期限"
-        @click="showPicker = true"
+      <van-calendar
+        v-model="show"
+        type="range"
+        @confirm="onConfirm"
+        color="#588ded"
       />
-      <van-popup v-model="showPicker" position="bottom">
-        <van-datetime-picker
-          type="time"
-          @confirm="onConfirm"
-          @cancel="showPicker = false"
-        />
-      </van-popup>
     </div>
     <!-- 底部导航 -->
     <div class="otherInfo">
@@ -63,20 +37,36 @@
 </template>
 
 <script>
+import { createUnpub } from "@/api/quest";
+import { Dialog } from "vant";
 export default {
   name: "",
   props: {},
   data() {
     return {
-      value: "",
-      columns: ["杭州", "宁波", "温州", "嘉兴", "湖州"],
-      showPicker: false,
+      date: "",
+      show: false,
+      quest: {
+        name: "",
+        section: "",
+      },
     };
   },
-  components: {},
+  components: { [Dialog.Component.name]: Dialog.Component },
   computed: {},
   methods: {
-        showDialog() {
+    // 选择时间区间
+    formatDate(date) {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    },
+    onConfirm(date) {
+      const [start, end] = date;
+      this.show = false;
+      this.quest.section = `${this.formatDate(start)} - ${this.formatDate(
+        end
+      )}`;
+    },
+    showDialog() {
       // 这里判断是否有问卷生成？？？？？？
       if (this.show === false)
         Dialog.confirm({
@@ -90,12 +80,20 @@ export default {
             // on cancel
           });
     },
-    onConfirm(value) {
-      this.value = value;
-      this.showPicker = false;
-    },
     intoAddIndex() {
-      this.$router.push("/add-index");
+      Dialog.confirm({
+        title: "提示",
+        message: "确定创建该问卷吗?",
+      })
+        .then(async() => {
+          const data=await createUnpub(this.quest)
+          console.log(data);
+          this.$router.push("/add-index");
+        })
+        .catch(() => {
+          Toast.fail("创建问卷失败");
+        });
+      
     },
     // 点击返回
     onClickLeft() {

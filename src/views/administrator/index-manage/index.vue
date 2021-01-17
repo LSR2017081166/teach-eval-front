@@ -70,7 +70,6 @@ export default {
     },
     // 进入创建问卷
     intoQuestInfo() {
-      this.showDialog()
       this.$router.push('/input-quest-info')
     },
     // 进入"开关评教"
