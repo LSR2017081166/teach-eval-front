@@ -12,7 +12,7 @@
       </template>
     </van-nav-bar>
     <!-- 问卷名称单元格 -->
-    <van-cell title="2020-2021学年第1学期评教问卷" value="10/10" />
+    <van-cell :title="unPub.name" value="10/10" />
     <!-- 题目表单 -->
     <div class="formArea">
       <!-- 题目 -->
@@ -70,6 +70,8 @@ export default {
     return {
       show1: false,
       show2: false,
+      // 未发布的问卷对象
+      unPub:this.$store.state.unPub
     };
   },
   components: {[Dialog.Component.name]: Dialog.Component},

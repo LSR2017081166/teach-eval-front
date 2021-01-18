@@ -11,11 +11,11 @@
     <!-- 问卷信息填写 -->
     <div class="addQuestInfo">
       <!-- 请输入问卷名称 -->
-      <van-field v-model="quest.name" label="问卷名称" />
+      <van-field v-model="unPub.name" label="问卷名称" required />
       <!-- 选择问卷填写时间区间 -->
       <van-cell
         title="选择该问卷评教时间区间"
-        :value="quest.section"
+        :value="unPub.section"
         @click="show = true"
       />
       <van-calendar
@@ -46,7 +46,8 @@ export default {
     return {
       date: "",
       show: false,
-      quest: {
+      // 未发布问卷对象
+      unPub: {
         name: "",
         section: "",
       },
@@ -62,7 +63,7 @@ export default {
     onConfirm(date) {
       const [start, end] = date;
       this.show = false;
-      this.quest.section = `${this.formatDate(start)} - ${this.formatDate(
+      this.unPub.section = `${this.formatDate(start)} - ${this.formatDate(
         end
       )}`;
     },
@@ -81,19 +82,17 @@ export default {
           });
     },
     intoAddIndex() {
-      Dialog.confirm({
-        title: "提示",
-        message: "确定创建该问卷吗?",
-      })
-        .then(async() => {
-          const data=await createUnpub(this.quest)
-          console.log(data);
-          this.$router.push("/add-index");
-        })
-        .catch(() => {
-          Toast.fail("创建问卷失败");
+      // 判断用户是否填写了完整的信息
+      if (this.unPub.name === "" || this.unPub.section === "") {
+        Dialog.confirm({
+          title: "提示",
+          message: "请填写完整的问卷信息",
         });
-      
+      } else {
+        this.$router.push("/add-index");
+        // 将用户填写的“未发布问卷”对象放到Vuex容器中
+        this.$store.commit("setUnPub", this.unPub);
+      }
     },
     // 点击返回
     onClickLeft() {
