@@ -12,38 +12,84 @@
       </template>
     </van-nav-bar>
     <!-- 问卷名称单元格 -->
-    <van-cell :title="unPub.name" value="10/10" />
+    <van-cell :title="questionnaire.name" :value="subNum" />
     <!-- 题目表单 -->
     <div class="formArea">
-      <!-- 题目 -->
-      <van-field v-model="value" label="题目" placeholder="请输入题目" />
-      <!-- 选项 -->
-      <div class="vanGroup1">
-        <van-field v-model="value" label="选项A" placeholder="请输入选项" />
-        <van-field v-model="value" label="选项B" placeholder="请输入选项" />
-        <van-field v-model="value" label="选项C" placeholder="请输入选项" />
-        <van-field v-model="value" label="选项D" placeholder="请输入选项" />
-      </div>
-      <!-- 分值 -->
-      <div class="vanGroup2">
-        <van-field v-model="value" placeholder="A分值" />
-        <van-field v-model="value" placeholder="B分值" />
-        <van-field v-model="value" placeholder="C分值" />
-        <van-field v-model="value" placeholder="D分值" />
-      </div>
+      <!-- forKey的存在是为了在点“清空”时更新表单，消除验证规则 -->
+      <van-form :key="formKey">
+        <!-- 题目 -->
+        <van-field
+          v-model="subject.title"
+          label="题目"
+          placeholder="请输入题目"
+          :rules="[{ required: true }]"
+        />
+        <!-- 选项 -->
+        <div class="vanGroup1">
+          <van-field
+            v-model="subject.optionA"
+            label="选项A"
+            placeholder="请输入选项"
+            :rules="[{ required: true }]"
+          />
+          <van-field
+            v-model="subject.optionB"
+            label="选项B"
+            placeholder="请输入选项"
+            :rules="[{ required: true }]"
+          />
+          <van-field
+            v-model="subject.optionC"
+            label="选项C"
+            placeholder="请输入选项"
+            :rules="[{ required: true }]"
+          />
+          <van-field
+            v-model="subject.optionD"
+            label="选项D"
+            placeholder="请输入选项"
+            :rules="[{ required: true }]"
+          />
+        </div>
+        <!-- 分值 -->
+        <div class="vanGroup2">
+          <van-field
+            v-model.number="subject.scoreA"
+            placeholder="A分值"
+            :rules="[{ validator }]"
+          />
+          <van-field
+            v-model.number="subject.scoreB"
+            placeholder="B分值"
+            :rules="[{ validator }]"
+          />
+          <van-field
+            v-model.number="subject.scoreC"
+            placeholder="C分值"
+            :rules="[{ validator }]"
+          />
+          <van-field
+            v-model.number="subject.scoreD"
+            placeholder="D分值"
+            :rules="[{ validator }]"
+          />
+        </div>
+      </van-form>
     </div>
     <!-- 其他信息部分 -->
     <div class="otherInfo">
       <!-- 分割线 -->
       <div class="divider"></div>
       <!-- 可编辑分数 -->
-      <van-tag color="#588ded">可编辑分数: 90 / 100</van-tag>
+      <van-tag color="#588ded">可编辑分数: {{ editScore }} / 100</van-tag>
       <!-- 清空按钮 -->
-      <van-button plain color="#588ded">清空</van-button>
+      <van-button plain color="#588ded" @click="reset">清空</van-button>
+      <!-- 保存按钮 -->
+      <van-button color="#588ded" @click="reset">保存</van-button>
       <!-- 底部导航 -->
-      <van-nav-bar left-text="上一题" @click-right="showDialog">
-        <template #right @click="showDialog" >
-          <van-icon name="add-o" size="25"/>
+      <van-nav-bar left-text="上一题" @click-right="addSub">
+        <template #right>
+          <van-icon name="add-o" size="25" />
         </template>
       </van-nav-bar>
     </div>
@@ -52,8 +98,13 @@
       <div class="menuItem">
         <van-grid direction="horizontal" :column-num="1">
           <van-grid-item icon="coupon" text="题目概览" />
-          <van-grid-item icon="add" text="加入简答" to="/add-index2" />
-          <van-grid-item icon="notes-o" text="暂存问卷" />
+          <van-grid-item
+            icon="add"
+            text="加入简答"
+            to="/add-index2"
+            @click="addJQuiz"
+          />
+          <van-grid-item icon="notes-o" text="暂存问卷" @click="tempQuest" />
         </van-grid>
       </div>
     </van-popup>
@@ -63,34 +114,112 @@
 <script>
 import { createApp } from "vue";
 import { Dialog } from "vant";
+import { Toast } from "vant";
+import { createQuest } from "@/api/questionnaire/createQuest";
 export default {
   name: "",
   props: {},
   data() {
     return {
+      // 可编辑分数
+      editScore1: 0,
+      formKey: 0,
       show1: false,
       show2: false,
-      // 未发布的问卷对象
-      unPub:this.$store.state.unPub
+      // 问卷对象
+      questionnaire: this.$store.state.questionnaire,
+      // 题目信息
+      subject: {
+        // 题号
+        subKey: 0,
+        title: "",
+        optionA: "",
+        optionB: "",
+        optionC: "",
+        optionD: "",
+        scoreA: "",
+        scoreB: "",
+        scoreC: "",
+        scoreD: "",
+      },
     };
   },
-  components: {[Dialog.Component.name]: Dialog.Component},
-  computed: {},
+  components: { [Dialog.Component.name]: Dialog.Component },
+  mounted() {
+    // 问卷的题目数+1
+    this.subject.subKey++;
+  },
+  computed: {
+    // 计算可编辑分数
+    editScore: function () {
+      let score =
+        this.questionnaire.score -
+        (this.subject.scoreA +
+          this.subject.scoreB +
+          this.subject.scoreC +
+          this.subject.scoreD);
+      if (score >= 0) {
+        this.editScore1 = score;
+        return score;
+      } else {
+        Toast.fail("可编辑分数不足！");
+        return;
+      }
+    },
+    // 计算题目位置(例如 1/10)
+    subNum: function () {
+      // 分母
+      let den = this.questionnaire.subjects.length + 1;
+      // 分子
+      let numer = this.subject.subKey;
+      return numer + "/" + den;
+    },
+  },
   methods: {
-    // 点击‘+’，用户编写题目不规范
-    showDialog() {
+    // 添加简答题
+    addJQuiz() {},
+    // 暂存问卷
+    async tempQuest() {
+      const res = await createQuest(this.questionnaire);
+      console.log(res);
+    },
+    // 校验函数返回 true 表示校验通过，false 表示不通过
+    validator(val) {
+      return /^\d+(?=\.{0,1}\d+$|$)/.test(val);
+    },
+    // 重置清空
+    reset() {
+      this.subject = {
+        subKey: this.subject.subKey + 1,
+        title: "",
+        optionA: "",
+        optionB: "",
+        optionC: "",
+        optionD: "",
+        scoreA: "",
+        scoreB: "",
+        scoreC: "",
+        scoreD: "",
+      };
+      this.formKey = +new Date();
+    },
+    // 点击‘+’
+    addSub() {
       // 这里判断用户编写题目是否规范
-      if (this.show2 === false)
-        Dialog.confirm({
-          title: "提示",
-          message: "请检查当前题目编写是否符合规范",
-        })
-          .then(() => {
-            // on confirm
-          })
-          .catch(() => {
-            // on cancel
-          });
+      for (let value in this.subject) {
+        if (this.subject[value] == "") {
+          Toast.fail("请检查编写题目是否规范！");
+          return;
+        }
+      }
+      // 将刚刚编写的一道题存入vuex中
+      this.questionnaire.subjects.push(this.subject);
+      // 更新可编辑分数
+      this.questionnaire.score = this.editScore1;
+      // 更新vuex中的“未发布问卷”
+      this.$store.commit("setQuest", this.questionnaire);
+      // 清空题目，进入下一题
+      this.reset();
     },
     // 点击返回
     onClickLeft() {

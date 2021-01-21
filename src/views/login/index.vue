@@ -5,14 +5,14 @@
     <div class="formArea">
       <van-form @submit="onLogin">
         <van-field
-          v-model="user.account"
+          v-model="login.account"
           name="账号"
           label="账号"
           placeholder="账号"
           :rules="[{ required: true, message: '请填写用户名' }]"
         />
         <van-field
-          v-model="user.password"
+          v-model="login.password"
           type="password"
           name="密码"
           label="密码"
@@ -31,13 +31,13 @@
 
 <script>
 import { Toast } from "vant";
-import { login } from "@/api/user";
+import { login } from "@/api/user/login";
 export default {
   name: "LoginIndex",
   props: {},
   data() {
     return {
-      user: {
+      login: {
         account: "",
         password: "",
       },
@@ -52,8 +52,9 @@ export default {
         forbidClick: true,
         duration: 0,
       });
-      const res = await login(this.user);
+      const res = await login(this.login);
       let data = res.data.data;
+      console.log(res);
       // 判断账号类型,以此进入不同页面
       if (res.data.status === 1) {
         if (data.account.length === 10) {

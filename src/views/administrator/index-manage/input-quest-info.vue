@@ -11,11 +11,11 @@
     <!-- 问卷信息填写 -->
     <div class="addQuestInfo">
       <!-- 请输入问卷名称 -->
-      <van-field v-model="unPub.name" label="问卷名称" required />
+      <van-field v-model="questionnaire.name" label="问卷名称" required />
       <!-- 选择问卷填写时间区间 -->
       <van-cell
         title="选择该问卷评教时间区间"
-        :value="unPub.section"
+        :value="questionnaire.section"
         @click="show = true"
       />
       <van-calendar
@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import { createUnpub } from "@/api/quest";
 import { Dialog } from "vant";
 export default {
   name: "",
@@ -47,9 +46,19 @@ export default {
       date: "",
       show: false,
       // 未发布问卷对象
-      unPub: {
+      questionnaire: {
+        // 问卷名称
         name: "",
+        // 问卷时间区间
         section: "",
+        // 问卷初始题目
+        subjects:[],
+        // 问卷简答题
+        jQuizs:[],
+        // 问卷初始可编辑分数
+        score:100,
+        // 是否发布(0为未发布，1为已发布)
+        publish:0
       },
     };
   },
@@ -63,7 +72,7 @@ export default {
     onConfirm(date) {
       const [start, end] = date;
       this.show = false;
-      this.unPub.section = `${this.formatDate(start)} - ${this.formatDate(
+      this.questionnaire.section = `${this.formatDate(start)} - ${this.formatDate(
         end
       )}`;
     },
@@ -83,7 +92,7 @@ export default {
     },
     intoAddIndex() {
       // 判断用户是否填写了完整的信息
-      if (this.unPub.name === "" || this.unPub.section === "") {
+      if (this.questionnaire.name === "" || this.questionnaire.section === "") {
         Dialog.confirm({
           title: "提示",
           message: "请填写完整的问卷信息",
@@ -91,7 +100,7 @@ export default {
       } else {
         this.$router.push("/add-index");
         // 将用户填写的“未发布问卷”对象放到Vuex容器中
-        this.$store.commit("setUnPub", this.unPub);
+        this.$store.commit("setQuest", this.questionnaire);
       }
     },
     // 点击返回
