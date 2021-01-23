@@ -25,36 +25,13 @@
       <!-- 分割线 -->
       <div class="divider"></div>
       <!-- 清空按钮 -->
-      <van-button plain color="#588ded">清空</van-button>
-      <!-- 底部导航 -->
-      <van-nav-bar left-text="上一题" @click-left="lastQuestion">
-      </van-nav-bar>
+      <van-button plain color="#588ded" @click="reset">清空</van-button>
     </div>
     <!-- 菜单弹出层 -->
-    <van-popup v-model="show1" position="bottom" :style="{ height: '30%' }">
+    <van-popup v-model="show1" position="bottom" :style="{ height: '10%' }">
       <div class="menuItem">
         <van-grid direction="horizontal" :column-num="1">
-          <van-grid-item icon="coupon" text="题目概览" @click="showPopup2" />
-          <van-grid-item
-            icon="add"
-            text="加入简答"
-            to="/add-index2"
-            @click="addSub"
-          />
-          <van-grid-item icon="notes-o" text="暂存问卷" />
-        </van-grid>
-      </div>
-    </van-popup>
-    <!-- 题目概览弹出层 -->
-    <van-popup v-model="show2" position="bottom" :style="{ height: '30%' }">
-      <div class="menuItem">
-        <van-grid :border="false" :column-num="5">
-          <van-grid-item v-for="value in 10" :key="value">
-            <p class="num">
-              <span>{{ value }}</span>
-            </p>
-            <p>10</p>
-          </van-grid-item>
+          <van-grid-item icon="notes-o" text="暂存问卷" @click="tempQuest" />
         </van-grid>
       </div>
     </van-popup>
@@ -63,15 +40,17 @@
 
 <script>
 import { Toast } from "vant";
+import { createQuest } from "@/api/questionnaire/createQuest";
+
 export default {
   name: "",
   props: {},
   data() {
     return {
+      // 分母
+      den: 0,
       // 菜单弹出层
       show1: false,
-      // 题目概览弹出层
-      show2: false,
       jQuiz: {
         title: "",
         questionKey: 0,
@@ -82,39 +61,40 @@ export default {
   },
   components: {},
   computed: {
+    // 返回“题目概览”的每道题分值
+    questScore: function () {
+      let a = [];
+      let b = this.questionnaire.subjects;
+      for (let i = 0; i < b.length; i++) {
+        a.push(b[i].scoreA + b[i].scoreB + b[i].scoreC + b[i].scoreD);
+      }
+      console.log(a);
+      return a;
+    },
     // 计算题目位置(例如 1/10)
     subNum: function () {
       let a = this.questionnaire.subjects.length;
       let b = this.questionnaire.jQuizs.length;
       // 分母
       this.jQuiz.questionKey = a + b + 1;
-      let den = this.jQuiz.questionKey;
+      this.den = this.jQuiz.questionKey;
 
       // 分子
       let numer = this.jQuiz.questionKey;
-      return numer + "/" + den;
+      return numer + "/" + this.den;
     },
   },
   methods: {
-    // 上一题
-    lastQuestion(){
-      // 判断上一道题型
-      let a=this.jQuiz.questionKey
-      let b=this.questionnaire.jQuizs.length
-      if(b===0){//说明进入了add-index2页面却没有添加任何简答题
-        this.$router.push('/add-index')
-      }
-    },
     // 重置清空
     reset() {
       this.jQuiz = {
         questionKey: this.jQuiz.questionKey + 1,
-        title: ""
+        title: "",
       };
       // this.formKey = +new Date();
     },
-    // 点击‘加入简答’
-    addSub() {
+    // 点击‘暂存问卷’
+    async tempQuest() {
       // 隐蔽弹出层
       this.show1 = false;
       // 这里判断用户编写题目是否规范
@@ -128,16 +108,13 @@ export default {
       this.questionnaire.jQuizs.push(this.jQuiz);
       // 更新vuex中的问卷
       this.$store.commit("setQuest", this.questionnaire);
-      // 清空题目，进入下一题
-      this.reset();
+      this.$router.push("/administrator");
+      Toast.success("暂存问卷成功！");
+      const res = await createQuest(this.questionnaire);
     },
     // 菜单弹出层
     showPopup1() {
       this.show1 = true;
-    },
-    // 题目概览弹出层
-    showPopup2() {
-      this.show2 = true;
     },
   },
 };

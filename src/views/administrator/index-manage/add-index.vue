@@ -84,26 +84,18 @@
       <van-tag color="#588ded">可编辑分数: {{ editScore }} / 100</van-tag>
       <!-- 清空按钮 -->
       <van-button plain color="#588ded" @click="reset">清空</van-button>
-      <!-- 保存按钮 -->
-      <van-button color="#588ded" @click="reset">保存</van-button>
       <!-- 底部导航 -->
-      <van-nav-bar left-text="上一题" @click-right="addSub">
+      <van-nav-bar @click-right="addSub">
         <template #right>
           <van-icon name="add-o" size="25" />
         </template>
       </van-nav-bar>
     </div>
     <!-- 菜单弹出层 -->
-    <van-popup v-model="show1" position="bottom" :style="{ height: '30%' }">
+    <van-popup v-model="show1" position="bottom" :style="{ height: '20%' }">
       <div class="menuItem">
         <van-grid direction="horizontal" :column-num="1">
-          <van-grid-item icon="coupon" text="题目概览" />
-          <van-grid-item
-            icon="add"
-            text="加入简答"
-            to="/add-index2"
-            @click="addJQuiz"
-          />
+          <van-grid-item icon="add" text="加入简答" @click="addJQuiz" />
           <van-grid-item icon="notes-o" text="暂存问卷" @click="tempQuest" />
         </van-grid>
       </div>
@@ -176,12 +168,39 @@ export default {
     },
   },
   methods: {
-    // 添加简答题
-    addJQuiz() {},
+    // 加入简答
+    addJQuiz() {
+      for (let value in this.subject) {
+        if (this.subject[value] == "") {
+          Toast.fail("请检查编写题目是否规范！");
+          return;
+        }
+      }
+      // 将刚刚编写的一道题存入vuex中
+      this.questionnaire.subjects.push(this.subject);
+      // 更新可编辑分数
+      this.questionnaire.score = this.editScore1;
+      // 更新vuex中的“未发布问卷”
+      this.$store.commit("setQuest", this.questionnaire);
+      this.$router.push("/add-index2");
+    },
     // 暂存问卷
     async tempQuest() {
+      for (let value in this.subject) {
+        if (this.subject[value] == "") {
+          Toast.fail("请检查编写题目是否规范！");
+          return;
+        }
+      }
+      // 将刚刚编写的一道题存入vuex中
+      this.questionnaire.subjects.push(this.subject);
+      // 更新可编辑分数
+      this.questionnaire.score = this.editScore1;
+      // 更新vuex中的“未发布问卷”
+      this.$store.commit("setQuest", this.questionnaire);
       const res = await createQuest(this.questionnaire);
-      console.log(res);
+      this.$router.push("/administrator");
+      Toast.success("暂存问卷成功！");
     },
     // 校验函数返回 true 表示校验通过，false 表示不通过
     validator(val) {
@@ -233,6 +252,11 @@ export default {
 };
 </script>
 <style lang='less' scoped>
+.van-nav-bar__left {
+  p {
+    color: #588ded;
+  }
+}
 .otherInfo {
   display: flex;
   flex-direction: column;

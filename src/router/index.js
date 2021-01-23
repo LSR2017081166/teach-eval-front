@@ -94,6 +94,18 @@ const routes = [
     path:'/pub-res',
     name:'pub-res',
     component:()=>import('@/views/administrator/index-manage/pub-res.vue')
+  },
+  // 选择问卷页面
+  {
+    path:'/choose-quest',
+    name:'choose-quest',
+    component:()=>import('@/views/administrator/index-manage/choose-quest.vue')
+  },
+  // 添加指标页面
+  {
+    path:'/addition',
+    name:'addition',
+    component:()=>import('@/views/administrator/index-manage/addition.vue')
   }
 ]
 
