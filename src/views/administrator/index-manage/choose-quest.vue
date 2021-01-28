@@ -2,9 +2,11 @@
 <template>
   <div class="choose-quest">
     <!-- 标题栏 -->
-    <van-nav-bar title="暂存问卷"> </van-nav-bar>
+    <van-nav-bar title="暂存问卷" left-text="返回"
+      left-arrow
+      @click-left="onClickLeft"> </van-nav-bar>
     <van-grid direction="horizontal" :column-num="1">
-      <van-grid-item icon="notes-o" v-for="(item,index) in allQuest" :key='index' :text="item.name" @click="intoQuest(item.name,item.score)"/>
+      <van-grid-item icon="notes-o" v-for="(item,index) in allQuest" :key='index' :text="item.name" @click="intoQuest(item.name,item.score,item.publish,item.section)"/>
     </van-grid>
   </div>
 </template>
@@ -28,13 +30,15 @@ export default {
   },
   methods: {
     // 进入问卷
-    async intoQuest(name,score){
+    async intoQuest(name,score,publish,section){
       this.$router.push({
         path:'/addition',
         name:'addition',
         params:{
           questName:name,
-          editScore:score
+          editScore:score,
+          publish,
+          section
         }
       });
     },
@@ -42,6 +46,10 @@ export default {
     async getQuestInfo1(){
       const res = await getQuestInfo();
      this.allQuest = res.data;
+    },
+    // 点击返回
+    onClickLeft() {
+      this.$router.go(-1);
     }
   },
 };

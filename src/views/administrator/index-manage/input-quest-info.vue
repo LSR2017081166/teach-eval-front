@@ -52,13 +52,31 @@ export default {
         // 问卷时间区间
         section: "",
         // 问卷初始题目
-        subjects:[],
+        subjects: [
+          {
+            // 题号
+            title: "",
+            optionA: "",
+            optionB: "",
+            optionC: "",
+            optionD: "",
+            scoreA: "",
+            scoreB: "",
+            scoreC: "",
+            scoreD: "",
+          },
+        ],
         // 问卷简答题
-        jQuizs:[],
+        jQuizs: [
+          {
+            questName: "",
+            title: "",
+          },
+        ],
         // 问卷初始可编辑分数
-        score:100,
+        score: 100,
         // 是否发布(0为未发布，1为已发布)
-        publish:0,
+        publish: 0,
         // 编辑中的页面对象
       },
     };
@@ -73,9 +91,9 @@ export default {
     onConfirm(date) {
       const [start, end] = date;
       this.show = false;
-      this.questionnaire.section = `${this.formatDate(start)} - ${this.formatDate(
-        end
-      )}`;
+      this.questionnaire.section = `${this.formatDate(
+        start
+      )} - ${this.formatDate(end)}`;
     },
     showDialog() {
       // 这里判断是否有问卷生成？？？？？？
@@ -99,9 +117,17 @@ export default {
           message: "请填写完整的问卷信息",
         });
       } else {
-        this.$router.push("/add-index");
-        // 将用户填写的“未发布问卷”对象放到Vuex容器中
-        this.$store.commit("setQuest", this.questionnaire);
+        // this.$router.push("/add-index");
+        this.$router.push({
+          path: "/createQuest",
+          name: "createQuest",
+          params: {
+            questName: this.questionnaire.name,
+            publish: "0",
+            section: this.questionnaire.section,
+            firstInto:0
+          },
+        });
       }
     },
     // 点击返回

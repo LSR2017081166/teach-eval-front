@@ -1,10 +1,10 @@
 <!-- ‘添加指标’页面-->
 <template>
-  <div class="addition">
+  <div class="create-quest">
     <!-- 标题栏 -->
     <van-nav-bar
       :title="questName"
-      left-text="返回"
+      left-text="哈哈"
       left-arrow
       @click-left="onClickLeft"
     >
@@ -22,29 +22,61 @@
           <van-form>
             <!-- 题目 -->
             <!-- <van-field v-model="quest[value - 1].title" label="题目" /> -->
-            <van-field v-model="quest[value - 1].title" label="题目"           placeholder="请输入题目"
-          :rules="[{ required: true }]"/>
+            <van-field
+              v-model="quest[value - 1].title"
+              label="题目"
+              placeholder="请输入题目"
+              :rules="[{ required: true }]"
+            />
             <!-- 选项 -->
             <div class="vanGroup1">
-              <van-field v-model="quest[value - 1].optionA" label="选项A" placeholder="请输入选项"
-            :rules="[{ required: true }]"/>
-              <van-field v-model="quest[value - 1].optionB" label="选项B" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
-              <van-field v-model="quest[value - 1].optionC" label="选项C" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
-              <van-field v-model="quest[value - 1].optionD" label="选项D" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
+              <van-field
+                v-model="quest[value - 1].optionA"
+                label="选项A"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionB"
+                label="选项B"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionC"
+                label="选项C"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionD"
+                label="选项D"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
             </div>
             <!-- 分值 -->
             <div class="vanGroup2">
-              <van-field v-model.number="quest[value - 1].scoreA" placeholder="A分值"
-            :rules="[{ validator }]"/>
-              <van-field v-model.number="quest[value - 1].scoreB" placeholder="A分值"
-            :rules="[{ validator }]" />
-              <van-field v-model.number="quest[value - 1].scoreC" placeholder="A分值"
-            :rules="[{ validator }]" />
-              <van-field v-model.number="quest[value - 1].scoreD" placeholder="A分值"
-            :rules="[{ validator }]" />
+              <van-field
+                v-model.number="quest[value - 1].scoreA"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreB"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreC"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreD"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
             </div>
           </van-form>
         </div>
@@ -138,6 +170,8 @@ export default {
   props: {},
   data() {
     return {
+      // 第一次进入问卷,自动添加一道空题,之后自动置为1
+      firstInto: 0,
       // 判断后来添加的选择题数量
       selectNum: 0,
       // 判断后来添加的简答题数量
@@ -183,7 +217,7 @@ export default {
       for (let i = 0; i < this.quest.length; i++) {
         let a = this.quest[i];
         b = b + a.scoreA + a.scoreB + a.scoreC + a.scoreD;
-        if(100-b<0){
+        if (100 - b < 0) {
           Toast.fail("请检查编写题目是否规范！");
           return;
         }
@@ -198,6 +232,7 @@ export default {
     }
   },
   created() {
+    this.firstInto = this.$route.params.firstInto;
     this.questName = this.$route.params.questName;
     this.publish = this.$route.params.publish;
     this.section = this.$route.params.section;
@@ -205,7 +240,20 @@ export default {
     this.questionnaire.name = this.questName;
     this.questionnaire.publish = this.publish;
     this.questionnaire.section = this.section;
-    this.getQuest();
+    if (this.firstInto === 0) {
+      this.quest.push({
+        title: "",
+        optionA: "",
+        optionB: "",
+        optionC: "",
+        optionD: "",
+        scoreA: "",
+        scoreB: "",
+        scoreC: "",
+        scoreD: "",
+      });
+    }
+    this.firstInto=1
   },
   methods: {
     // 校验函数返回 true 表示校验通过，false 表示不通过
@@ -214,7 +262,7 @@ export default {
     },
     // 暂存问卷，删除所有原题后，重新存入数据库
     async tempSave() {
-      this.show = false;
+      // this.show = false;
       // 判断问题是否都填写规范
       // 选择题
       for (let i = 0; i < this.quest.length; i++) {
@@ -236,16 +284,19 @@ export default {
           }
         }
       }
-      // 删除该问卷下所有题目
+      
       let name = this.questName;
       console.log(this.questionnaire);
       this.questionnaire.subjects = this.quest;
+      this.questionnaire.jQuizs = this.jQuizs;
       // 更新vuex中的“未发布问卷”
       this.$store.commit("setQuest", this.questionnaire);
       console.log(this.questionnaire);
+      // 删除该问卷下所有题目
       const res1 = await delAllQuests({ name });
       if (res1.data === "ok") {
         await createQuest(this.questionnaire);
+        Toast.success("问卷创建成功!");
       }
 
       // 加入新的题目
@@ -312,22 +363,6 @@ export default {
       this.type = 1;
       this.active2 = value - 1;
       this.point = "1";
-    },
-    // 得到该问卷题目信息
-    async getQuest() {
-      let name = this.questName;
-      // 选择问卷后设置questionnaire有关的新的信息
-      // 获取选择题
-      const res1 = await getQuestions({ name });
-      this.quest = res1.data;
-      this.questionnaire.subjects = this.quest;
-      console.log(this.quest);
-      // 获取简答题
-      const res2 = await getJQuizs({ name });
-      this.jQuizs = res2.data;
-      this.questionnaire.jQuizs = this.jQuizs;
-      // 存入vuex
-      this.$store.commit("setQuest", this.questionnaire);
     },
     // 点击返回
     onClickLeft() {

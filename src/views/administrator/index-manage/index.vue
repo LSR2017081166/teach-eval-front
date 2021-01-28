@@ -4,22 +4,14 @@
     <van-nav-bar title="评教系统"> </van-nav-bar>
     <!-- 菜单选项 -->
     <div class="container">
-      <van-grid :column-num="3" :gutter="10">
-        <van-grid-item @click="intoQuestInfo"
-          ><van-icon name="orders-o" color="#d4237a" />
+      <van-grid :column-num="2" :gutter="20">
+        <van-grid-item to="/input-quest-info"
+          ><van-icon name="orders-o" color="#00bc00" />
           <p>创建问卷</p></van-grid-item
         >
-        <van-grid-item
-          ><van-icon name="add-o" color="#23d763" />
-          <p>添加指标</p></van-grid-item
-        >
-        <van-grid-item
-          ><van-icon name="edit" color="#ef7f3c" />
-          <p>修改指标</p></van-grid-item
-        >
-        <van-grid-item
-          ><van-icon name="close" color="#428ee4" />
-          <p>删除指标</p></van-grid-item
+        <van-grid-item to='/choose-quest'
+          ><van-icon name="edit" color="#d4237a" />
+          <p>修改问卷</p></van-grid-item
         >
         <van-grid-item @click="intoSwitch"
           ><van-icon name="bulb-o" color="#f1665c" />

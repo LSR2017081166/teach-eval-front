@@ -106,6 +106,18 @@ const routes = [
     path:'/addition',
     name:'addition',
     component:()=>import('@/views/administrator/index-manage/addition.vue')
+  },
+  // 展示简答题页面
+  {
+    path:'/jQuiz',
+    name:'jQuiz',
+    component:()=>import('@/views/administrator/index-manage/jQuiz.vue')
+  },
+  // 创建问卷页面
+  {
+    path:'/createQuest',
+    name:'createQuest',
+    component:()=>import('@/views/administrator/index-manage/createQuest.vue')
   }
 ]
 
