@@ -7,3 +7,10 @@ export const getQuestInfo =()=>{
         url:'quest/getQuestInfo'
     })
 }
+// 获取已发布问卷信息
+export const getPubInfo =()=>{
+    return request({
+        method:"GET",
+        url:'quest/getPubInfo'
+    })
+}

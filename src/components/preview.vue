@@ -3,57 +3,37 @@
     <van-cell center :border="false">
       <!-- <div slot="title">{{ quest[0].questName }}</div> -->
       <div slot="title">选择题</div>
-      <van-button
-        type="info"
-        plain
-        round
-        size="mini"
-        @click="isEdit1 = !isEdit1"
-        >{{ isEdit1 ? "完成" : "编辑" }}
-      </van-button>
     </van-cell>
     <van-grid :gutter="10">
       <van-grid-item
         class="grid-item"
-        :icon="isEdit1 ? 'clear' : ''"
         :class="{ active: index === active1 }"
         v-for="(value, index) in quest.length"
         :key="index"
         :text="'第' + (index + 1) + '题'"
         @click="onUserChannelClick1(index)"
       />
-      <van-grid-item icon="add-o" class="grid-item1" @click="addQuest1" />
     </van-grid>
     <!-- 简答题 -->
     <van-cell center :border="false">
       <!-- <div slot="title">{{ quest[0].questName }}</div> -->
       <div slot="title">简答题</div>
-      <van-button
-        type="info"
-        plain
-        round
-        size="mini"
-        @click="isEdit2 = !isEdit2"
-        >{{ isEdit2 ? "完成" : "编辑" }}
-      </van-button>
     </van-cell>
     <van-grid :gutter="10">
       <van-grid-item
         class="grid-item"
-        :icon="isEdit2 ? 'clear' : ''"
         :class="{ active: index === active2 }"
         v-for="(value, index) in jQuizs.length"
         :key="index"
         :text="'第' + (index + 1) + '题'"
         @click="onUserChannelClick2(index)"
       />
-      <van-grid-item icon="add-o" class="grid-item1" @click="addQuest2" />
     </van-grid>
     <!-- 分割线 -->
     <div class="divider"></div>
     <div class="button">
-      <van-button plain type="info" @click="tempSave">暂存</van-button>
-      <van-button type="info" @click="publish">发布</van-button>
+      <van-button plain type="info">暂存</van-button>
+      <van-button type="info">提交</van-button>
     </div>
   </div>
 </template>
@@ -81,26 +61,11 @@ export default {
   },
   data() {
     return {
-      isEdit1: false, //控制编辑的显示状态
-      isEdit2: false,
     };
   },
   components: {},
   computed: {},
   methods: {
-    // 点击发布
-    publish() {
-      this.$emit("publish");
-    },
-    // 点击暂存
-    tempSave() {
-      this.$emit("temp-save");
-    },
-    // 点击加号，添加选择题
-    addQuest1() {
-      this.$emit("add-select");
-      this.$emit("close");
-    },
     // 选择题：点击题号，进入对应题目
     onUserChannelClick1(index) {
       if (this.isEdit1) {
@@ -138,10 +103,6 @@ export default {
         // 发送给父组件，让其关闭弹出层
         this.$emit("close");
       }
-    },
-    addQuest2() {
-      this.$emit("add-jQuiz");
-      this.$emit("close");
     },
   },
 };

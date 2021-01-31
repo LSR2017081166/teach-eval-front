@@ -22,29 +22,61 @@
           <van-form>
             <!-- 题目 -->
             <!-- <van-field v-model="quest[value - 1].title" label="题目" /> -->
-            <van-field v-model="quest[value - 1].title" label="题目"           placeholder="请输入题目"
-          :rules="[{ required: true }]"/>
+            <van-field
+              v-model="quest[value - 1].title"
+              label="题目"
+              placeholder="请输入题目"
+              :rules="[{ required: true }]"
+            />
             <!-- 选项 -->
             <div class="vanGroup1">
-              <van-field v-model="quest[value - 1].optionA" label="选项A" placeholder="请输入选项"
-            :rules="[{ required: true }]"/>
-              <van-field v-model="quest[value - 1].optionB" label="选项B" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
-              <van-field v-model="quest[value - 1].optionC" label="选项C" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
-              <van-field v-model="quest[value - 1].optionD" label="选项D" placeholder="请输入选项"
-            :rules="[{ required: true }]" />
+              <van-field
+                v-model="quest[value - 1].optionA"
+                label="选项A"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionB"
+                label="选项B"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionC"
+                label="选项C"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
+              <van-field
+                v-model="quest[value - 1].optionD"
+                label="选项D"
+                placeholder="请输入选项"
+                :rules="[{ required: true }]"
+              />
             </div>
             <!-- 分值 -->
             <div class="vanGroup2">
-              <van-field v-model.number="quest[value - 1].scoreA" placeholder="A分值"
-            :rules="[{ validator }]"/>
-              <van-field v-model.number="quest[value - 1].scoreB" placeholder="A分值"
-            :rules="[{ validator }]" />
-              <van-field v-model.number="quest[value - 1].scoreC" placeholder="A分值"
-            :rules="[{ validator }]" />
-              <van-field v-model.number="quest[value - 1].scoreD" placeholder="A分值"
-            :rules="[{ validator }]" />
+              <van-field
+                v-model.number="quest[value - 1].scoreA"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreB"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreC"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
+              <van-field
+                v-model.number="quest[value - 1].scoreD"
+                placeholder="A分值"
+                :rules="[{ validator }]"
+              />
             </div>
           </van-form>
         </div>
@@ -119,6 +151,7 @@
         @add-jQuiz="addJQuiz"
         @specification="specification"
         @temp-save="tempSave"
+        @publish="pubQuest"
       />
     </van-popup>
   </div>
@@ -132,6 +165,7 @@ import { delAllQuests } from "@/api/questionnaire/delAllQuests";
 import QuestionEdit from "@/components/question-edit";
 import { Toast } from "vant";
 import { createQuest } from "@/api/questionnaire/createQuest";
+import { pubQuest } from "@/api/questionnaire/pubQuest";
 
 export default {
   name: "",
@@ -183,7 +217,7 @@ export default {
       for (let i = 0; i < this.quest.length; i++) {
         let a = this.quest[i];
         b = b + a.scoreA + a.scoreB + a.scoreC + a.scoreD;
-        if(100-b<0){
+        if (100 - b < 0) {
           Toast.fail("请检查编写题目是否规范！");
           return;
         }
@@ -208,13 +242,34 @@ export default {
     this.getQuest();
   },
   methods: {
+    // 发布问卷
+    pubQuest() {
+      // 检查可编辑分数是否为0
+      let name = this.questName;
+      if (this.editScore === 0) {
+        Dialog.confirm({
+          title: "提示",
+          message: "发布后无法更改，确认发布吗？",
+        })
+          .then(async () => {
+            let res = await pubQuest({ name });
+            if (res.data === "ok") {
+              Toast.success("问卷发布成功!");
+            }
+          })
+          .catch(() => {
+            Toast.fail("问卷发布失败！");
+          });
+      } else {
+        Toast.fail("所编写题目要求总分为100！");
+      }
+    },
     // 校验函数返回 true 表示校验通过，false 表示不通过
     validator(val) {
       return /^\d+(?=\.{0,1}\d+$|$)/.test(val);
     },
     // 暂存问卷，删除所有原题后，重新存入数据库
     async tempSave() {
-      this.show = false;
       // 判断问题是否都填写规范
       // 选择题
       for (let i = 0; i < this.quest.length; i++) {
@@ -238,14 +293,13 @@ export default {
       }
       // 删除该问卷下所有题目
       let name = this.questName;
-      console.log(this.questionnaire);
       this.questionnaire.subjects = this.quest;
       // 更新vuex中的“未发布问卷”
       this.$store.commit("setQuest", this.questionnaire);
-      console.log(this.questionnaire);
       const res1 = await delAllQuests({ name });
       if (res1.data === "ok") {
         await createQuest(this.questionnaire);
+        Toast.success("问卷暂存成功!");
       }
 
       // 加入新的题目

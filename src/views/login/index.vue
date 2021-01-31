@@ -32,6 +32,7 @@
 <script>
 import { Toast } from "vant";
 import { login } from "@/api/user/login";
+import { getIdInfo } from "@/api/user/getIdInfo";
 export default {
   name: "LoginIndex",
   props: {},
@@ -53,20 +54,24 @@ export default {
         duration: 0,
       });
       const res = await login(this.login);
-      let data = res.data.data;
-      console.log(res);
+      // 得到用户账号
+      let account = res.data.toString();
       // 判断账号类型,以此进入不同页面
-      if (res.data.status === 1) {
-        if (data.account.length === 10) {
-          this.$router.push("/student");
-          Toast.success("登录成功！");
-        } else if (data.account.length === 8) {
-          this.$router.push("/teacher");
-          Toast.success("登录成功！");
-        } else if (data.account.length === 6) {
-          this.$router.push("/administrator");
-          Toast.success("登录成功！");
-        }
+      if (account.length === 10) {
+        // 通过账号查询学生身份信息，将信息传入vuex的idInfo
+        let res1 = await getIdInfo({ account });
+        console.log(res1.data[0]);
+        // 更新vuex中的学生身份信息
+        this.$store.commit("setIdInfo", res1.data[0]);
+        this.$router.push("/student");
+        Toast.success("登录成功！");
+      } else if (account.length === 8) {
+        // 通过账号查询老师身份信息，将信息传入vuex的idInfo
+        this.$router.push("/teacher");
+        Toast.success("登录成功！");
+      } else if (account.length === 6) {
+        this.$router.push("/administrator");
+        Toast.success("登录成功！");
       } else {
         Toast.fail("登录失败，账号或密码错误！");
       }

@@ -71,18 +71,6 @@ const routes = [
     name:'input-quest-info',
     component:()=>import('@/views/administrator/index-manage/input-quest-info.vue')
   },
-  // 创建问卷---增加选择题
-  {
-    path:'/add-index',
-    name:'add-index',
-    component:()=>import('@/views/administrator/index-manage/add-index.vue')
-  },
-  // 创建问卷---增加简答题
-  {
-    path:'/add-index2',
-    name:'add-index2',
-    component:()=>import('@/views/administrator/index-manage/add-index2.vue')
-  },
   // 开关评教
   {
     path:'/switch',
@@ -118,6 +106,18 @@ const routes = [
     path:'/createQuest',
     name:'createQuest',
     component:()=>import('@/views/administrator/index-manage/createQuest.vue')
+  },
+  // 创建问卷页面
+  {
+    path:'/stuEval',
+    name:'stuEval',
+    component:()=>import('@/views/student/s-teach-eval/stuEval.vue')
+  },
+  // 创建问卷页面
+  {
+    path:'/teaCourse',
+    name:'teaCourse',
+    component:()=>import('@/views/student/s-teach-eval/teaCourse.vue')
   }
 ]
 

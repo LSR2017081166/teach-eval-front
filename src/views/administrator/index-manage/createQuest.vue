@@ -1,10 +1,10 @@
-<!-- ‘添加指标’页面-->
+<!-- 填完问卷信息后，编写问题的页面-->
 <template>
   <div class="create-quest">
     <!-- 标题栏 -->
     <van-nav-bar
       :title="questName"
-      left-text="哈哈"
+      left-text="返回"
       left-arrow
       @click-left="onClickLeft"
     >
@@ -64,17 +64,17 @@
               />
               <van-field
                 v-model.number="quest[value - 1].scoreB"
-                placeholder="A分值"
+                placeholder="B分值"
                 :rules="[{ validator }]"
               />
               <van-field
                 v-model.number="quest[value - 1].scoreC"
-                placeholder="A分值"
+                placeholder="C分值"
                 :rules="[{ validator }]"
               />
               <van-field
                 v-model.number="quest[value - 1].scoreD"
-                placeholder="A分值"
+                placeholder="D分值"
                 :rules="[{ validator }]"
               />
             </div>
@@ -151,6 +151,7 @@
         @add-jQuiz="addJQuiz"
         @specification="specification"
         @temp-save="tempSave"
+        @publish="pubQuest"
       />
     </van-popup>
   </div>
@@ -164,6 +165,7 @@ import { delAllQuests } from "@/api/questionnaire/delAllQuests";
 import QuestionEdit from "@/components/question-edit";
 import { Toast } from "vant";
 import { createQuest } from "@/api/questionnaire/createQuest";
+import { pubQuest } from "@/api/questionnaire/pubQuest";
 
 export default {
   name: "",
@@ -256,6 +258,28 @@ export default {
     this.firstInto=1
   },
   methods: {
+        // 发布问卷
+    pubQuest() {
+      // 检查可编辑分数是否为0
+      let name = this.questName;
+      if (this.editScore === 0) {
+        Dialog.confirm({
+          title: "提示",
+          message: "发布后无法更改，确认发布吗？",
+        })
+          .then(async () => {
+            let res = await pubQuest({ name });
+            if (res.data === "ok") {
+              Toast.success("问卷发布成功!");
+            }
+          })
+          .catch(() => {
+            Toast.fail("问卷发布失败！");
+          });
+      } else {
+        Toast.fail("所编写题目要求总分为100！");
+      }
+    },
     // 校验函数返回 true 表示校验通过，false 表示不通过
     validator(val) {
       return /^\d+(?=\.{0,1}\d+$|$)/.test(val);

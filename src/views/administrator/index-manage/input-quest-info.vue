@@ -9,6 +9,23 @@
     >
     </van-nav-bar>
     <!-- 问卷信息填写 -->
+    <!-- 选择年级 -->
+    <van-field
+      readonly
+      clickable
+      label="年级"
+      :value="value1"
+      placeholder="选择年级"
+      @click="showPicker = true"
+    />
+    <van-popup v-model="showPicker" round position="bottom">
+      <van-picker
+        show-toolbar
+        :columns="columns"
+        @cancel="showPicker = false"
+        @confirm="onConfirm1"
+      />
+    </van-popup>
     <div class="addQuestInfo">
       <!-- 请输入问卷名称 -->
       <van-field v-model="questionnaire.name" label="问卷名称" required />
@@ -43,6 +60,9 @@ export default {
   props: {},
   data() {
     return {
+      value1: "",
+      showPicker: false,
+      columns: ["2017", "2018", "2019", "2020"],
       date: "",
       show: false,
       // 未发布问卷对象
@@ -84,6 +104,11 @@ export default {
   components: { [Dialog.Component.name]: Dialog.Component },
   computed: {},
   methods: {
+    // 选择年级
+    onConfirm1(value1) {
+      this.value1 = value1;
+      this.showPicker = false;
+    },
     // 选择时间区间
     formatDate(date) {
       return `${date.getMonth() + 1}/${date.getDate()}`;
@@ -125,7 +150,7 @@ export default {
             questName: this.questionnaire.name,
             publish: "0",
             section: this.questionnaire.section,
-            firstInto:0
+            firstInto: 0,
           },
         });
       }

@@ -4,7 +4,7 @@
     <van-nav-bar title="评教系统"> </van-nav-bar>
     <!-- 菜单选项 -->
     <div class="container">
-      <van-grid :column-num="2" :gutter="20">
+      <van-grid :column-num="3" :gutter="20">
         <van-grid-item to="/input-quest-info"
           ><van-icon name="orders-o" color="#00bc00" />
           <p>创建问卷</p></van-grid-item
@@ -12,10 +12,6 @@
         <van-grid-item to='/choose-quest'
           ><van-icon name="edit" color="#d4237a" />
           <p>修改问卷</p></van-grid-item
-        >
-        <van-grid-item @click="intoSwitch"
-          ><van-icon name="bulb-o" color="#f1665c" />
-          <p>开关评教</p></van-grid-item
         >
         <van-grid-item @click="intoResults"
           ><van-icon name="certificate" color="#38c9e5" />
