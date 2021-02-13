@@ -60,7 +60,6 @@ export default {
       if (account.length === 10) {
         // 通过账号查询学生身份信息，将信息传入vuex的idInfo
         let res1 = await getIdInfo({ account });
-        console.log(res1.data[0]);
         // 更新vuex中的学生身份信息
         this.$store.commit("setIdInfo", res1.data[0]);
         this.$router.push("/student");

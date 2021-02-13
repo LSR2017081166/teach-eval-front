@@ -3,7 +3,7 @@
   <div class="addition">
     <!-- 标题栏 -->
     <van-nav-bar
-      :title="questName"
+      :title="project"
       left-text="返回"
       left-arrow
       @click-left="onClickLeft"
@@ -26,32 +26,32 @@
             <!-- 选项 -->
             <div class="vanGroup1">
               <van-field
-                :class="{ selectedA: selectedA }"
+                :class="{ selected: result1[value - 1].option === 'A' }"
                 v-model="quest[value - 1].optionA"
                 :label="'A' + '(' + quest[value - 1].scoreA + '分)'"
                 readonly
-                @click="getScoreA('A', quest[value - 1].scoreA)"
+                @click="getScoreA('A', quest[value - 1].scoreA, value - 1)"
               />
               <van-field
-                :class="{ selectedB: selectedB }"
+                :class="{ selected: result1[value - 1].option === 'B' }"
                 v-model="quest[value - 1].optionB"
                 :label="'B' + '(' + quest[value - 1].scoreB + '分)'"
                 readonly
-                @click="getScoreB('B', quest[value - 1].scoreB)"
+                @click="getScoreB('B', quest[value - 1].scoreB, value - 1)"
               />
               <van-field
-                :class="{ selectedC: selectedC }"
+                :class="{ selected: result1[value - 1].option === 'C' }"
                 v-model="quest[value - 1].optionC"
                 :label="'C' + '(' + quest[value - 1].scoreC + '分)'"
                 readonly
-                @click="getScoreC('C', quest[value - 1].scoreC)"
+                @click="getScoreC('C', quest[value - 1].scoreC, value - 1)"
               />
               <van-field
-                :class="{ selectedD: selectedD }"
+                :class="{ selected: result1[value - 1].option === 'D' }"
                 v-model="quest[value - 1].optionD"
                 :label="'D' + '(' + quest[value - 1].scoreD + '分)'"
                 readonly
-                @click="getScoreD('D', quest[value - 1].scoreD)"
+                @click="getScoreD('D', quest[value - 1].scoreD, value - 1)"
               />
             </div>
           </van-form>
@@ -59,8 +59,7 @@
         <!-- 分割线 -->
         <div class="divider"></div>
         <div class="button">
-          <van-button plain type="info">暂存</van-button>
-          <van-button type="info">提交</van-button>
+          <van-button plain type="info" @click="subResult">提交</van-button>
         </div>
       </van-tab>
       <div slot="nav-right" class="wap-nav-placeholder"></div>
@@ -80,20 +79,22 @@
           <!-- forKey的存在是为了在点“清空”时更新表单，消除验证规则 -->
           <van-form>
             <!-- 题目 -->
-            <!-- 请输入文本 -->
+            <van-field v-model="jQuizs[value - 1].title" autosize readonly />
+            <div class="divider"></div>
+            <!-- 请输入答案 -->
             <van-field
-              v-model="jQuizs[value - 1].title"
+              v-model="result2[value - 1]"
               rows="5"
               autosize
               type="textarea"
+              placeholder="请作答"
             />
           </van-form>
         </div>
         <!-- 分割线 -->
         <div class="divider"></div>
         <div class="button">
-          <van-button plain type="info">暂存</van-button>
-          <van-button type="info">提交</van-button>
+          <van-button plain type="info" @click="subResult">提交</van-button>
         </div>
       </van-tab>
       <div slot="nav-right" class="wap-nav-placeholder"></div>
@@ -128,18 +129,25 @@ import { Dialog } from "vant";
 import { getQuestions } from "@/api/questionnaire/getQuestions";
 import Preview from "@/components/preview";
 import { Toast } from "vant";
+import { saveResult } from "@/api/result/saveResult";
 
 export default {
   name: "",
   props: {},
   data() {
     return {
-      // 
-      // 选中项样式
-      selectedA: false,
-      selectedB: false,
-      selectedC: false,
-      selectedD: false,
+      // 该学生信息
+      idInfo: this.$store.state.idInfo,
+      // 简答题结果
+      result2: [],
+      // 选择的被评课程名称
+      project: "",
+      // 选择题结果
+      result1: [],
+      // 选中项
+      option: "",
+      // 选中项得分
+      score: 0,
       // 判断是选择题还是简答题,0是选择，1是简答
       type: 0,
       // 简答题数组
@@ -177,41 +185,78 @@ export default {
     }
   },
   created() {
+    // 从上一个选择课程的页面路由获取被评课程名称
+    this.project = this.$route.params.project;
     // 从vuex中取出该问卷的信息和题目集
     let a = this.$store.state.questionnaire;
     this.questName = a[0][0].questName;
     this.quest = a[0];
     this.jQuizs = a[1];
+    // 在页面一开始创建就将问卷结果集填满空答案，防止样式报错
+    for (let i = 0; i < this.quest.length; i++) {
+      this.result1.push({ title: "", option: "", score: 0 });
+    }
   },
   methods: {
+    // 提交学生评教结果
+    async subResult() {
+      // 将简答题题目和对应答案合并
+      for (let i = 0; i < this.result2.length; i++) {
+        this.jQuizs[i].answer = this.result2[i];
+      }
+      console.log(this.jQuizs);
+      // 判断是否有选择题目未作答
+      for (let i = 0; i < this.result1.length; i++) {
+        if (this.result1[i].option === "") {
+          Toast.fail("请检查选择题是否作答完毕！");
+          return;
+        }
+      }
+      // 判断是否有简答题目未作答
+      for (let i = 0; i < this.jQuizs.length; i++) {
+        if (this.jQuizs[i].answer === "" || !this.jQuizs[i].answer) {
+          Toast.fail("请检查简答题是否作答完毕！");
+          return;
+        }
+      }
+      Dialog.confirm({
+        title: "提示",
+        message: "提交后无法更改，确认提交吗？",
+      })
+        .then(async () => {
+          // 存入选择题choiceRes和简答题jQuizRes结果表
+          let a = {
+            questName: this.questName,
+            project: this.project,
+            result1: this.result1,
+            sno: this.idInfo.sno,
+            jQuizs: this.jQuizs,
+          };
+          let res = await saveResult(a);
+          if (res.data.data) {
+            Toast.success("问卷提交成功！");
+          }
+        })
+        .catch(() => {
+          Toast.fail("提交问卷失败！");
+        });
+    },
     // 点击选项，得到选中选项和对应分值
-    getScoreA(option, score) {
-      this.selectedA = true;
-      this.selectedB = false;
-      this.selectedC = false;
-      this.selectedD = false;
-      console.log(option, score);
+    getScoreA(option, score, value) {
+      let title = this.quest[value].title;
+      this.result1.splice(value, 1, { option, score, title });
     },
-    getScoreB(option, score) {
-      this.selectedB = true;
-      this.selectedA = false;
-      this.selectedC = false;
-      this.selectedD = false;
-      console.log(option, score);
+    getScoreB(option, score, value) {
+      let title = this.quest[value].title;
+      this.result1.splice(value, 1, { option, score, title });
     },
-    getScoreC(option, score) {
-      this.selectedC = true;
-      this.selectedB = false;
-      this.selectedA = false;
-      this.selectedD = false;
-      console.log(option, score);
+    getScoreC(option, score, value) {
+      let title = this.quest[value].title;
+      this.result1.splice(value, 1, { option, score, title });
     },
-    getScoreD(option, score) {
-      this.selectedD = true;
-      this.selectedB = false;
-      this.selectedC = false;
-      this.selectedA = false;
-      console.log(option, score);
+    getScoreD(option, score, value) {
+      let title = this.quest[value].title;
+      this.result1.splice(value, 1, { option, score, title });
     },
     //点击了选择题题号
     onUpdateActive1(value) {
@@ -255,6 +300,7 @@ export default {
   margin-top: 25px;
   width: 100%;
   height: 1px;
+  background-color: #588ded;
 }
 .formArea {
   margin-top: 10px;
@@ -277,16 +323,7 @@ export default {
   .questArea {
     width: 90%;
   }
-  .selectedA {
-    background-color: #588ced3b;
-  }
-  .selectedB {
-    background-color: #588ced3b;
-  }
-  .selectedC {
-    background-color: #588ced3b;
-  }
-  .selectedD {
+  .selected {
     background-color: #588ced3b;
   }
 }

@@ -45,7 +45,6 @@ export default {
     async getPubInfo1(){
       let res=await getPubInfo()
       this.pubQuest=res.data
-      console.log(this.pubQuest);
     },
     async stuEval(name) {
       // 根据点击的问卷名称，查出对应的问卷，放入vuex的questionnaire中
@@ -53,6 +52,7 @@ export default {
       let res2=await getJQuizs({name})
       let a=[]
       a.push(res1.data)
+      console.log(res1.data);
       a.push(res2.data)
       this.$store.commit("setQuest", a);
       this.$router.push("/teaCourse");

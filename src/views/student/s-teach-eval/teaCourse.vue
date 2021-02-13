@@ -3,7 +3,7 @@
   <div class="choose-quest">
     <!-- 标题栏 -->
     <van-nav-bar
-      title="被评教师"
+      title="被评课程"
       left-text="返回"
       left-arrow
       @click-left="onClickLeft"
@@ -16,14 +16,14 @@
       size="large"
       :label="item.teacher"
       icon="notes-o"
-      @click="intoStuEval"
+      @click="intoStuEval(item.name)"
     />
   </div>
 </template>
 
 <script>
 import { Dialog } from "vant";
-import { getCourse } from "@/api/course/getCourse";
+import { getCourse1 } from "@/api/course/getCourse";
 
 export default {
   name: "",
@@ -41,15 +41,20 @@ export default {
   },
   methods: {
     // 进入学生评教问卷
-    intoStuEval(){
-      this.$router.push('/stuEval');
+    intoStuEval(project){
+            this.$router.push({
+        path:'/stuEval',
+        name:'stuEval',
+        params:{
+          project
+        }
+      });
     },
     // 获取被评课程信息
     async getCourseInfo() {
       let { academy, classInfo, grade } = this.idInfo;
-      let res = await getCourse({ academy, classInfo, grade });
+      let res = await getCourse1({ academy, classInfo, grade });
       this.courseInfo = res.data;
-      console.log(this.courseInfo);
     },
     // 点击返回
     onClickLeft() {

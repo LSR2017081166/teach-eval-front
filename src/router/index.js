@@ -118,7 +118,25 @@ const routes = [
     path:'/teaCourse',
     name:'teaCourse',
     component:()=>import('@/views/student/s-teach-eval/teaCourse.vue')
-  }
+  },
+  // 进入选择不同老师和课程的问卷结果页
+  {
+    path:'/questRes',
+    name:'questRes',
+    component:()=>import('@/views/administrator/check-eval/questRes.vue')
+  },
+    // 显示每题得分情况的柱形图页
+    {
+      path:'/detailChart1',
+      name:'detailChart1',
+      component:()=>import('@/views/administrator/check-eval/detailChart1.vue'),
+    }, 
+    // 显示每题得分情况的扇形图页
+    {
+      path:'/detailChart2',
+      name:'detailChart2',
+      component:()=>import('@/views/administrator/check-eval/detailChart2.vue')
+    },
 ]
 
 const router = new VueRouter({

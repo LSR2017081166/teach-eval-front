@@ -9,15 +9,6 @@
     >
     </van-nav-bar>
     <!-- 问卷信息填写 -->
-    <!-- 选择年级 -->
-    <van-field
-      readonly
-      clickable
-      label="年级"
-      :value="value1"
-      placeholder="选择年级"
-      @click="showPicker = true"
-    />
     <van-popup v-model="showPicker" round position="bottom">
       <van-picker
         show-toolbar

@@ -17,7 +17,9 @@ import 'vant/lib/index.css'
 import 'amfe-flexible'
 // 加载全局样式
 import './styles/index.less'
-
+// 引入echarts
+import * as echarts from 'echarts'
+Vue.prototype.$echarts = echarts
 
 // 全局注册Vant中的组件
 Vue.use(Vant)

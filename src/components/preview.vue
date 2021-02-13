@@ -32,8 +32,7 @@
     <!-- 分割线 -->
     <div class="divider"></div>
     <div class="button">
-      <van-button plain type="info">暂存</van-button>
-      <van-button type="info">提交</van-button>
+      <van-button plain type="info">提交</van-button>
     </div>
   </div>
 </template>
@@ -66,6 +65,7 @@ export default {
   components: {},
   computed: {},
   methods: {
+
     // 选择题：点击题号，进入对应题目
     onUserChannelClick1(index) {
       if (this.isEdit1) {
