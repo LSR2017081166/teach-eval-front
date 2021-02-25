@@ -8,3 +8,12 @@ export const getAllTeachers =data=>{
         data
     })
 }
+// 得到指定的教师信息
+export const getTeacher =data=>{
+    return request({
+        method:"POST",
+        url:'user/getTeacher',
+        data
+    })
+}
+

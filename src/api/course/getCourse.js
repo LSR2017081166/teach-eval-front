@@ -16,11 +16,3 @@ export const getCourse2 =data=>{
         data
     })
 }
-// 通过一系列信息查询课程下的所有学生评教结果
-export const getRes =data=>{
-    return request({
-        method:"POST",
-        url:'course/getRes',
-        data
-    })
-}

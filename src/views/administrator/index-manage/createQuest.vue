@@ -234,11 +234,13 @@ export default {
     }
   },
   created() {
+    this.questType = this.$route.params.questType;
     this.firstInto = this.$route.params.firstInto;
     this.questName = this.$route.params.questName;
     this.publish = this.$route.params.publish;
     this.section = this.$route.params.section;
     // 选择问卷后设置questionnaire有关的新的信息
+    this.questionnaire.questType = this.questType;
     this.questionnaire.name = this.questName;
     this.questionnaire.publish = this.publish;
     this.questionnaire.section = this.section;

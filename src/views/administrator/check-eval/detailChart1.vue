@@ -7,7 +7,11 @@
       left-text="返回"
       left-arrow
       @click-left="onClickLeft"
-    />
+    >
+      <template #right>
+        <van-icon name="other-pay" size="18" @click="intoJQuiz" />
+      </template>
+    </van-nav-bar>
     <van-cell :value="course" icon="orders-o" />
     <div id="myChart" :style="{ width: '100%', height: '300px' }"></div>
     <van-tag color="#588ded">总分：{{ totalScore }}</van-tag>
@@ -26,7 +30,7 @@ export default {
       totalScore: 0,
       questName: this.$store.state.questName,
       course: "",
-      result: [],
+      choiceRes: [],
       questions: [],
       // 已评教人数
       num: 0,
@@ -37,19 +41,23 @@ export default {
   created() {
     this.questName = this.$store.state.questRes.questName;
     this.course = this.$store.state.questRes.course;
-    this.result = this.$store.state.questRes.result;
-    console.log(this.result);
+    this.choiceRes = this.$store.state.questRes.choiceRes;
+    console.log(this.choiceRes);
     this.getQuestions1();
     this.getTotal();
-    this.getNum()
+    this.getNum();
   },
   mounted() {
     this.drawLine();
   },
   methods: {
+    // 点击右上角图标，查看所有简答题结果
+    intoJQuiz(){
+this.$router.push('/jQuizRes')
+    },
     // 计算有多少人已评教
     getNum() {
-      let a = this.result[0];
+      let a = this.choiceRes[0];
       console.log(a);
       this.num =
         a.optionA.length +
@@ -59,8 +67,8 @@ export default {
     },
     // 计算总分
     getTotal() {
-      for (let i = 0; i < this.result.length; i++) {
-        this.totalScore += this.result[i].average;
+      for (let i = 0; i < this.choiceRes.length; i++) {
+        this.totalScore += this.choiceRes[i].average;
       }
       this.totalScore = this.totalScore.toFixed(2);
     },
@@ -68,6 +76,7 @@ export default {
     async getQuestions1() {
       let name = this.questName;
       const res = await getQuestions({ name });
+      //
       this.$store.commit("setQuestions", res.data);
     },
     // 点击返回
@@ -77,20 +86,24 @@ export default {
     drawLine() {
       // 纵坐标的题目名称
       let yAxisDate = [];
-      for (let i = 1; i <= this.result.length; i++) {
+      for (let i = 1; i <= this.choiceRes.length; i++) {
         yAxisDate.push("第" + i + "题");
       }
       // 每题得分
       let seriesDate = [];
-      for (let i = 0; i < this.result.length; i++) {
-        seriesDate.push(this.result[i].average);
+      for (let i = 0; i < this.choiceRes.length; i++) {
+        seriesDate.push(this.choiceRes[i].average.toFixed(2));
       }
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById("myChart"));
       // 绘制图表
 
       myChart.setOption({
-        title: { text: "每题得分情况"+"(已评教人数:"+this.num+')', padding: 20, x: "center" },
+        title: {
+          text: "每题得分情况" + "(已评教人数:" + this.num + ")",
+          padding: 20,
+          x: "center",
+        },
         tooltip: {},
         xAxis: {
           type: "value",

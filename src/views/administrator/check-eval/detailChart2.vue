@@ -22,7 +22,7 @@
           :style="{ width: '100%', height: '300px' }"
         ></div>
         <div class="tagCon">
-          <van-tag color="#588ded">得分：{{ item.average }}</van-tag>
+          <van-tag color="#588ded">得分：{{ item.average.toFixed(2) }}</van-tag>
         </div>
       </van-tab>
     </van-tabs>
@@ -53,7 +53,7 @@ export default {
   },
   created() {
     this.questName = this.$store.state.questRes.questName;
-    this.result = this.$store.state.questRes.result;
+    this.result = this.$store.state.questRes.choiceRes;
     this.dataIndex = this.$route.params.dataIndex;
     this.active = this.dataIndex;
     this.getOption();

@@ -3,7 +3,7 @@
     <!-- 标题栏 -->
     <van-nav-bar title="学生评教"> </van-nav-bar>
     <!-- 点击进入学生评教页面 -->
-    <div class="questItem" @click="stuEval(item.name)" v-for="(item,index) in pubQuest" :key='index'>
+    <div class="questItem" @click="stuEval(item.name)" v-for="(item,index) in stuQuest" :key='index'>
       <!-- 问卷名称 -->
       <div class="name">{{item.name}}</div>
       <!-- 分割线 -->
@@ -32,7 +32,7 @@ export default {
     return {
       time: 0,
       // 查询已发布问卷作为学生即将填写的问卷
-      pubQuest:[]
+      stuQuest:[]
     };
   },
   components: {},
@@ -44,7 +44,12 @@ export default {
     // 得到已发布问卷信息
     async getPubInfo1(){
       let res=await getPubInfo()
-      this.pubQuest=res.data
+            let a = res.data;
+            for (let i = 0; i < a.length; i++) {
+        if (a[i].questType === "1") {
+          this.stuQuest.push(a[i]);
+        }
+      }
     },
     async stuEval(name) {
       // 根据点击的问卷名称，查出对应的问卷，放入vuex的questionnaire中

@@ -32,6 +32,11 @@
         @confirm="onConfirm"
         color="#588ded"
       />
+      <!-- 选择问卷类型 -->
+      <van-radio-group v-model="radio" direction="horizontal">
+        <van-radio name="1">学生问卷</van-radio>
+        <van-radio name="2">教师问卷</van-radio>
+      </van-radio-group>
     </div>
     <!-- 底部导航 -->
     <div class="otherInfo">
@@ -51,6 +56,8 @@ export default {
   props: {},
   data() {
     return {
+      // 问卷类型（1为学生，2为教师）
+      radio: '1',
       value1: "",
       showPicker: false,
       columns: ["2017", "2018", "2019", "2020"],
@@ -133,7 +140,6 @@ export default {
           message: "请填写完整的问卷信息",
         });
       } else {
-        // this.$router.push("/add-index");
         this.$router.push({
           path: "/createQuest",
           name: "createQuest",
@@ -142,6 +148,8 @@ export default {
             publish: "0",
             section: this.questionnaire.section,
             firstInto: 0,
+            // 问卷类型(1为学生问卷，2为教师问卷)
+            questType:this.radio
           },
         });
       }
@@ -154,6 +162,12 @@ export default {
 };
 </script>
 <style lang='less' scoped>
+.van-radio-group{
+  margin-top: 10px;
+  background-color: #fff;
+  padding: 10px;
+  font-size: 15px;
+}
 .otherInfo {
   .van-nav-bar {
     background-color: #fff;

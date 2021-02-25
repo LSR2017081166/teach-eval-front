@@ -28,7 +28,7 @@
       />
     </van-popup>
     <!-- 展示该老师下的课程 -->
-    <van-cell
+    <!-- <van-cell
       v-for="(item, index) in courseInfo"
       :key="index"
       :title="item.name"
@@ -37,7 +37,7 @@
       :label="item.grade + '级 - ' + item.classInfo"
       icon="notes-o"
       @click="intoStuEval(item.name, item.grade, item.classInfo)"
-    />
+    /> -->
   </div>
 </template>
 
@@ -130,12 +130,21 @@ export default {
       this.fieldValue = selectedOptions.map((option) => option.text).join("/");
       // b是储存学院，教师姓名的对象，准备发送给后端
       this.arr = this.fieldValue.split("/");
-      let b = {
-        academy: this.arr[0],
-        teaName: this.arr[1],
-      };
-      let res = await getCourse2(b);
-      this.courseInfo = res.data;
+      // 确认为该教师评教？
+      Dialog.confirm({
+        title: "提示",
+        message: "确认为---" + this.arr[0] + "/" + this.arr[1] + "---评教吗",
+      }).then(async () => {
+        // 将问卷名称，评教人工号，被评教人学院和姓名存入vuex
+        let a = {
+          questName: this.questName,
+          academy: this.arr[0],
+          teaName: this.arr[1],
+          jobNum: this.$store.state.idInfo.jobNum,
+        };
+        this.$store.commit("setTeaQuest", a);
+        this.$router.push("/teaEval");
+      });
     },
   },
 };

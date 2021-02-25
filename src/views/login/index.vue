@@ -66,6 +66,10 @@ export default {
         Toast.success("登录成功！");
       } else if (account.length === 8) {
         // 通过账号查询老师身份信息，将信息传入vuex的idInfo
+        let res1 = await getIdInfo({ account });
+        console.log(res1);
+        // 更新vuex中的老师身份信息
+        this.$store.commit("setIdInfo", res1.data[0]);
         this.$router.push("/teacher");
         Toast.success("登录成功！");
       } else if (account.length === 6) {
